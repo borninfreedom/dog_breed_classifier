@@ -12,6 +12,7 @@ from keras.callbacks import ModelCheckpoint
 import time
 from keras.applications.resnet50 import preprocess_input,decode_predictions
 from keras.applications.resnet50 import ResNet50
+from extract_bottleneck_features import *
 ##
 # Step 0 | Import Datasets
 
@@ -175,19 +176,19 @@ def dog_breed_detector(img_file):
 
 # TODO: Test the performance of the dog_detector function
 
-human_files_short=human_files[:100]
-dog_files_short=train_files[:100]
-validation_files=[item for item in sorted(valid_files)]
-
-humans_count=0
-dogs_count=0
-for img in human_files_short:
-    if dog_detector(img)==True:
-        humans_count+=1
-
-for img in dog_files_short:
-    if dog_detector(img)==True:
-        dogs_count+=1
+# human_files_short=human_files[:100]
+# dog_files_short=train_files[:100]
+# validation_files=[item for item in sorted(valid_files)]
+#
+# humans_count=0
+# dogs_count=0
+# for img in human_files_short:
+#     if dog_detector(img)==True:
+#         humans_count+=1
+#
+# for img in dog_files_short:
+#     if dog_detector(img)==True:
+#         dogs_count+=1
 # This is using for test the performance on validation_dataset,
 # if needed,turn it on.
 
@@ -195,8 +196,8 @@ for img in dog_files_short:
 #     if dog_detector(img)==True:
 #         dogs_count+=1
 
-print('%.1f%% images of humans are misclassified as dogs.'%humans_count)
-print('%.1f%% images of dogs are correctly classified as dogs.'%dogs_count)
+# print('%.1f%% images of humans are misclassified as dogs.'%humans_count)
+# print('%.1f%% images of dogs are correctly classified as dogs.'%dogs_count)
 
 # TODO:These files are the locale images corresponding with the ImageNet directory of 1000 categories.
 # The ImageNet catogories link is https://gist.github.com/yrevar/942d3a0ac09ec9e5eb3a,
@@ -241,9 +242,9 @@ print('%.1f%% images of dogs are correctly classified as dogs.'%dogs_count)
 # TODO: Pre-process the Data
 #
 #
-train_tensors=paths_to_tensor(train_files).astype('float32')/255
-valid_tensors=paths_to_tensor(valid_files).astype('float32')/255
-test_tensors=paths_to_tensor(test_files).astype('float32')/255
+# train_tensors=paths_to_tensor(train_files).astype('float32')/255
+# valid_tensors=paths_to_tensor(valid_files).astype('float32')/255
+# test_tensors=paths_to_tensor(test_files).astype('float32')/255
 
 
 #
@@ -488,7 +489,7 @@ print('Xception test accuracy: %.4f%%' % Xception_test_accuracy)
 # # TODO:Step 5 | Write and test final algorithms
 #
 # # TODO: Write a function that takes a path to an image as input and returns the dog breed
-# from extract_bottleneck_features import *
+
 # def VGG16_dog_predictor(img_path):
 #     bottleneck_feature=extract_VGG16(path_to_tensor(img_path))
 #     predicted_vector=VGG16_model.predict(bottleneck_feature)
@@ -509,35 +510,90 @@ print('Xception test accuracy: %.4f%%' % Xception_test_accuracy)
 #     predicted_vector=VGG16_model.predict(bottleneck_feature)
 #     return dog_names[np.argmax(predicted_vector)]
 #
-# def Xception_dog_predictor(img_path):
-#     bottleneck_feature=extract_Xception(path_to_tensor(img_path))
-#     predicted_vector=VGG16_model.predict(bottleneck_feature)
-#     return dog_names[np.argmax(predicted_vector)]
-#
+dog_names=[item[6:].replace('_',' ') for item in dog_names]
+def Xception_dog_predictor(img_path):
+    bottleneck_feature=extract_Xception(path_to_tensor(img_path))
+    predicted_vector=Xception_model.predict(bottleneck_feature)
+    return dog_names[np.argmax(predicted_vector)]
+
 # # TODO: Write final algorithm
-# def final_dog_predictor(img_path):
-#     img=cv2.imread(img_path)
-#     cv_rgb=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-#     plt.imshow(cv_rgb)
-#
+def final_dog_predictor(img_path):
+    img=cv2.imread(img_path)
+    cv_rgb=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    plt.imshow(cv_rgb)
+    plt.show()
 # # We use the weights of ResNet-50 to judge whether an image is dog,
 # # cause though breeds classifier's accuracy is about 87%,
 # # the accuracy of whether a dog is 100%
-#
-#     if dog_detector(img_path):
-#         print("Dog.")
-#         # why use return? Cause return will send the control flow to main
-#         # thread, it's like if ... else if... else
-#         # It reduce the judgement times.
-#         return print('Predicted breed is ...\n{}'.format(Xception_dog_predictor(img_path)))
-#
+
+    if dog_detector(img_path):
+        print("This is a Dog.")
+        # why use return? Cause return will send the control flow to main
+        # thread, it's like if ... else if... else
+        # It reduce the judgement times.
+        return print('Predicted breed is ...\n{}'.format(Xception_dog_predictor(img_path)))
+
 # # opencv's cascade's accuracy is not 100%,so later we will use
 # # DL to replace cascade.
-#     if face_detector(img_path):
-#         print('Human.')
-#         return print('If you were a dog, your breed would be a ...\n{}'.format(Xception_dog_predictor(img_path)))
-#
-#     else:
-#         return print('Sorry! no Dog or Human is detected.')
-#
+    if face_detector(img_path):
+        print('This is a Human.')
+        return
 
+    else:
+        return print('Sorry! no Dog or Human is detected.')
+
+# Test prediction
+
+print('\n')
+print('These images are taidi dogs. Test results are below:')
+print('----------------------------------------------------')
+final_dog_predictor('sample_images/sample_taidi_1.jpg')
+final_dog_predictor('sample_images/sample_taidi_2.jpg')
+final_dog_predictor('sample_images/sample_taidi_3.jpg')
+final_dog_predictor('sample_images/sample_taidi_4.jpeg')
+final_dog_predictor('sample_images/sample_taidi_5.jpg')
+final_dog_predictor('sample_images/sample_taidi_6.jpg')
+print('\n')
+
+print('These images are labuladuo dogs. Test results are below:')
+print('--------------------------------------------------------')
+final_dog_predictor('sample_images/sample_labuladuo_1.jpg')
+final_dog_predictor('sample_images/sample_labuladuo_2.png')
+final_dog_predictor('sample_images/sample_labuladuo_3.jpg')
+final_dog_predictor('sample_images/sample_labuladuo_4.jpg')
+final_dog_predictor('sample_images/sample_labuladuo_5.jpg')
+final_dog_predictor('sample_images/sample_labuladuo_6.jpg')
+final_dog_predictor('sample_images/sample_6.jpg')
+print('\n')
+
+print('These images are jinmao dogs. Test results are below:')
+print('-----------------------------------------------------')
+final_dog_predictor('sample_images/sample_jinmao_1.jpg')
+final_dog_predictor('sample_images/sample_jinmao_2.jpeg')
+final_dog_predictor('sample_images/sample_jinmao_3.jpg')
+final_dog_predictor('sample_images/sample_jinmao_4.jpeg')
+final_dog_predictor('sample_images/sample_jinmao_5.jpg')
+final_dog_predictor('sample_images/sample_jinmao_6.jpg')
+final_dog_predictor('sample_images/sample_jinmao_7.jpg')
+final_dog_predictor('sample_images/sample_jinmao_8.jpg')
+final_dog_predictor('sample_images/sample_jinmao_9.jpg')
+print('\n')
+
+print('These images are beagle dogs. Test results are below:')
+print('-----------------------------------------------------')
+final_dog_predictor('sample_images/sample_11.jpg')
+print('\n')
+
+print('These images are humans. Test results are below:')
+print('------------------------------------------------')
+final_dog_predictor('sample_images/sample_1.jpg')
+final_dog_predictor('sample_images/sample_2.jpg')
+final_dog_predictor('sample_images/sample_3.jpg')
+print('\n')
+
+print('These images are not humans or dogs. Test results are below:')
+print('------------------------------------------------------------')
+final_dog_predictor('sample_images/sample_5.jpg')
+final_dog_predictor('sample_images/sample_8.jpg')
+final_dog_predictor('sample_images/sample_9.jpg')
+print('\n')
