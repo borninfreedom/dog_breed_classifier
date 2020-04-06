@@ -8,7 +8,7 @@ def extract_VGG19(tensor):
 
 def extract_Resnet50(tensor):
 	from keras.applications.resnet50 import ResNet50, preprocess_input
-	return ResNet50(weights='imagenet', include_top=False).predict(preprocess_input(tensor))
+	return ResNet50(weights='imagenet', include_top=False,pooling='avg').predict(preprocess_input(tensor))
 
 def extract_Xception(tensor):
 	from keras.applications.xception import Xception, preprocess_input

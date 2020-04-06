@@ -311,7 +311,7 @@ def dog_breed_detector(img_file):
 # Extract the 'bottleneck_feature.zip' and move all the files to the
 # 'bottleneck_features' folder.
 
-epochs=20
+epochs=5000
 
 # bottleneck_features_VGG16=np.load('bottleneck_features/DogVGG16Data.npz')
 # train_VGG16=bottleneck_features_VGG16['train']
@@ -329,12 +329,12 @@ epochs=20
 # train_Resnet50=bottleneck_features_Resnet50['train']
 # valid_Resnet50=bottleneck_features_Resnet50['valid']
 # test_Resnet50=bottleneck_features_Resnet50['test']
-#
+
 # bottleneck_features_InceptionV3=np.load('bottleneck_features/DogInceptionV3Data.npz')
 # train_InceptionV3=bottleneck_features_InceptionV3['train']
 # valid_InceptionV3=bottleneck_features_InceptionV3['valid']
 # test_InceptionV3=bottleneck_features_InceptionV3['test']
-#
+
 bottleneck_features_Xception=np.load('bottleneck_features/DogXceptionData.npz')
 train_Xception=bottleneck_features_Xception['train']
 valid_Xception=bottleneck_features_Xception['valid']
@@ -420,10 +420,10 @@ test_Xception=bottleneck_features_Xception['test']
 # # report test accuracy
 # Resnet50_test_accuracy = 100*np.sum(np.array(Resnet50_predictions)==np.argmax(test_targets, axis=1))/len(Resnet50_predictions)
 # print('Resnet50 test accuracy: %.4f%%' % Resnet50_test_accuracy)
+
 #
 #
-#
-#
+# #
 # InceptionV3_model=Sequential()
 # InceptionV3_model.add(GlobalAveragePooling2D(input_shape=train_InceptionV3.shape[1:]))
 # InceptionV3_model.add(Dense(133,activation='softmax'))
@@ -490,6 +490,7 @@ print('Xception test accuracy: %.4f%%' % Xception_test_accuracy)
 #
 # # TODO: Write a function that takes a path to an image as input and returns the dog breed
 
+dog_names=[item[6:].replace('_',' ') for item in dog_names]
 # def VGG16_dog_predictor(img_path):
 #     bottleneck_feature=extract_VGG16(path_to_tensor(img_path))
 #     predicted_vector=VGG16_model.predict(bottleneck_feature)
@@ -502,17 +503,20 @@ print('Xception test accuracy: %.4f%%' % Xception_test_accuracy)
 #
 # def Resnet50_dog_predictor(img_path):
 #     bottleneck_feature=extract_Resnet50(path_to_tensor(img_path))
-#     predicted_vector=VGG16_model.predict(bottleneck_feature)
+#     bottleneck_feature=np.expand_dims(bottleneck_feature,axis=0)
+#     bottleneck_feature=np.expand_dims(bottleneck_feature,axis=0)
+#     predicted_vector=Resnet50_model.predict(bottleneck_feature)
 #     return dog_names[np.argmax(predicted_vector)]
-#
+# #
 # def InceptionV3_dog_predictor(img_path):
 #     bottleneck_feature=extract_InceptionV3(path_to_tensor(img_path))
-#     predicted_vector=VGG16_model.predict(bottleneck_feature)
+#     predicted_vector=InceptionV3_model.predict(bottleneck_feature)
 #     return dog_names[np.argmax(predicted_vector)]
 #
-dog_names=[item[6:].replace('_',' ') for item in dog_names]
+
 def Xception_dog_predictor(img_path):
     bottleneck_feature=extract_Xception(path_to_tensor(img_path))
+    print('bottleneck_feature shape is : ',bottleneck_feature.shape)
     predicted_vector=Xception_model.predict(bottleneck_feature)
     return dog_names[np.argmax(predicted_vector)]
 
@@ -527,12 +531,13 @@ def final_dog_predictor(img_path):
 # # the accuracy of whether a dog is 100%
 
     if dog_detector(img_path):
-        print("This is a Dog.")
+        #print("This is a Dog.")
         # why use return? Cause return will send the control flow to main
         # thread, it's like if ... else if... else
         # It reduce the judgement times.
         return print('Predicted breed is ...\n{}'.format(Xception_dog_predictor(img_path)))
-
+        #return print('Predicted breed is ...\n{}'.format(Resnet50_dog_predictor(img_path)))
+        #return print('Predicted breed is ...\n{}'.format(InceptionV3_dog_predictor(img_path)))
 # # opencv's cascade's accuracy is not 100%,so later we will use
 # # DL to replace cascade.
     if face_detector(img_path):
